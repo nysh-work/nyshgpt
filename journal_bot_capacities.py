@@ -15,6 +15,8 @@ JOURNAL_OBJECT_TYPE_ID = "e0d4f9f7-87f1-4cef-98d1-fcb1308b8458"
 genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel("gemini-2.5-pro-preview-03-25")
 
+st.set_page_config(page_title="Nysh GPT", page_icon="📱", layout="wide", initial_sidebar_state="collapsed")
+
 # Add custom CSS for better styling
 st.markdown("""
 <style>
@@ -54,8 +56,6 @@ st.markdown("""
     }
 </style>
 """, unsafe_allow_html=True)
-
-st.set_page_config(page_title="Nysh GPT", page_icon="📱", layout="wide", initial_sidebar_state="collapsed")
 
 # === APP TABS ===
 tab1, tab2, tab3 = st.tabs(["📓 Journal", "💬 Chat", "⏰ Reminders"])
