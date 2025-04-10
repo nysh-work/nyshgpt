@@ -55,6 +55,8 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
+st.set_page_config(page_title="Nysh GPT", page_icon="📱", layout="wide", initial_sidebar_state="collapsed")
+
 # === APP TABS ===
 tab1, tab2, tab3 = st.tabs(["📓 Journal", "💬 Chat", "⏰ Reminders"])
 
