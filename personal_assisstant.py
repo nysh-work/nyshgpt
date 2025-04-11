@@ -516,6 +516,7 @@ with tab2:
         import sqlite3
         import plotly.express as px
         import pandas as pd
+        import plotly.express as px
         import plotly.graph_objects as go
         from plotly.subplots import make_subplots
         db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
