@@ -54,17 +54,28 @@ st.markdown("""
         margin-bottom: 0.5rem;
     }
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 10px;
+        padding: 0 1rem;
+        margin-bottom: 1.5rem;
     }
     .stTabs [data-baseweb="tab"] {
-        height: 50px;
+        height: 60px;
         white-space: pre-wrap;
-        border-radius: 4px;
-        font-weight: 500;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1rem;
+        padding: 0 1.5rem;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .stTabs [data-baseweb="tab"]:hover {
+        background-color: rgba(128, 90, 213, 0.05);
+        transform: translateY(-2px);
     }
     .stTabs [aria-selected="true"] {
-        background-color: rgba(128, 90, 213, 0.1);
-        border-bottom-color: rgb(128, 90, 213);
+        background-color: rgba(128, 90, 213, 0.15);
+        border-bottom: 3px solid rgb(128, 90, 213);
+        color: #805AD5;
     }
     .stButton button {
         border-radius: 4px;
