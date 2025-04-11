@@ -662,7 +662,7 @@ with tab4:
         
         # Reminder form with mobile-friendly layout
         with st.form("reminder_form"):
-            reminder_name = st.text_input("Reminder Name", value=st.session_state.reminder_name_voice)
+            reminder_name = st.text_input("Reminder Name", value=st.session_state.get("reminder_name", ""))
             
             # Use columns for date and time to save space
             col1, col2 = st.columns([1, 1])
