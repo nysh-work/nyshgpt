@@ -325,6 +325,8 @@ with tab2:
     
     try:
         import sqlite3
+        import plotly.express as px
+        import pandas as pd
         db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
@@ -355,6 +357,45 @@ with tab2:
         entries = cursor.fetchall()
         
         if entries:
+            # Gantt chart visualization
+            with st.expander("📊 Timeline View", expanded=True):
+                # Prepare data for visualization
+                df = pd.DataFrame(entries, columns=["timestamp", "entry", "mood", "tags"])
+                df["date"] = pd.to_datetime(df["timestamp"]).dt.date
+                df["count"] = 1
+                
+                # Group by date and mood
+                grouped = df.groupby(["date", "mood"])["count"].sum().reset_index()
+                
+                # Create Gantt-like timeline
+                fig = px.timeline(
+                    grouped, 
+                    x_start="date", 
+                    x_end="date", 
+                    y="mood",
+                    color="mood",
+                    color_discrete_map={
+                        "😄 Great": "#4CAF50",
+                        "🙂 Okay": "#8BC34A",
+                        "😐 Neutral": "#FFC107",
+                        "😔 Low": "#FF9800",
+                        "😣 Anxious": "#F44336"
+                    },
+                    title="Journal Entries Timeline",
+                    labels={"mood": "Mood", "date": "Date"},
+                    height=400
+                )
+                fig.update_layout(showlegend=False)
+                fig.update_traces(width=0.5)
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Show daily entry count
+                daily_count = df.groupby("date")["count"].sum().reset_index()
+                st.markdown("**Daily Entry Count**")
+                st.dataframe(daily_count, hide_index=True, use_container_width=True)
+            
+            # Individual entries display
+            st.markdown("**Individual Entries**")
             for entry in entries:
                 with st.expander(f"{entry[0]} - {entry[2]}"):
                     st.markdown(f"**Mood:** {entry[2]}")
