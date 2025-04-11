@@ -460,61 +460,62 @@ with tab2:
     st.markdown("Visualize your mood trends and browse past entries")
     
     # AI Insights section
-    st.markdown("### 🤖 AI-Powered Insights")
-    st.markdown("##### Journal Entry Analysis")
-    
-    if st.button("🔍 Analyze My Entries"):
-        with st.spinner("Analyzing your journal entries..."):
-            try:
-                import sqlite3
-                db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
-                conn = sqlite3.connect(db_path)
-                cursor = conn.cursor()
-                
-                # Get all entries
-                cursor.execute("SELECT entry, mood, tags FROM journal_entries ORDER BY timestamp DESC")
-                entries = cursor.fetchall()
-                
-                if entries:
-                    # Prepare data for analysis
-                    all_text = " ".join([entry[0] for entry in entries])
-                    moods = [entry[1] for entry in entries]
-                    tags = [entry[2] for entry in entries if entry[2]]
+    with st.container():
+        st.markdown("### 🤖 AI-Powered Insights")
+        st.markdown("##### Journal Entry Analysis")
+        
+        if st.button("🔍 Analyze My Entries"):
+            with st.spinner("Analyzing your journal entries..."):
+                try:
+                    import sqlite3
+                    db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
+                    conn = sqlite3.connect(db_path)
+                    cursor = conn.cursor()
                     
-                    # Generate insights with Gemini
-                    prompt = f"""Analyze these journal entries and provide insights:
+                    # Get all entries
+                    cursor.execute("SELECT entry, mood, tags FROM journal_entries ORDER BY timestamp DESC")
+                    entries = cursor.fetchall()
                     
-                    Journal Entries: {all_text[:10000]}
-                    
-                    Please provide:
-                    1. Key themes and patterns
-                    2. Emotional trends based on moods: {', '.join(set(moods))}
-                    3. Suggestions for improvement or areas to focus on
-                    4. Any notable changes over time
-                    
-                    Format as a clear, bullet-point summary."""
-                    
-                    response = model.generate_content(prompt)
-                    with st.container():
-                        st.markdown(response.text)
-                    
-                    # Additional analysis for common tags
-                    if tags:
-                        prompt = f"""Analyze these journal tags and suggest habits:
+                    if entries:
+                        # Prepare data for analysis
+                        all_text = " ".join([entry[0] for entry in entries])
+                        moods = [entry[1] for entry in entries]
+                        tags = [entry[2] for entry in entries if entry[2]]
                         
-                        Tags: {', '.join(tags)}
+                        # Generate insights with Gemini
+                        prompt = f"""Analyze these journal entries and provide insights:
                         
-                        Suggest 3 habits that could help based on these tags."""
+                        Journal Entries: {all_text[:10000]}
+                        
+                        Please provide:
+                        1. Key themes and patterns
+                        2. Emotional trends based on moods: {', '.join(set(moods))}
+                        3. Suggestions for improvement or areas to focus on
+                        4. Any notable changes over time
+                        
+                        Format as a clear, bullet-point summary."""
+                        
                         response = model.generate_content(prompt)
-                        st.markdown("### Suggested Habits")
-                        st.markdown(response.text)
-                else:
-                    st.info("No entries found to analyze.")
-            except Exception as e:
-                st.error(f"Error analyzing entries: {e}")
-            finally:
-                if 'conn' in locals():
-                    conn.close()
+                        with st.container():
+                            st.markdown(response.text)
+                        
+                        # Additional analysis for common tags
+                        if tags:
+                            prompt = f"""Analyze these journal tags and suggest habits:
+                            
+                            Tags: {', '.join(tags)}
+                            
+                            Suggest 3 habits that could help based on these tags."""
+                            response = model.generate_content(prompt)
+                            st.markdown("### Suggested Habits")
+                            st.markdown(response.text)
+                    else:
+                        st.info("No entries found to analyze.")
+                except Exception as e:
+                    st.error(f"Error analyzing entries: {e}")
+                finally:
+                    if 'conn' in locals():
+                        conn.close()
     
     try:
         import sqlite3
