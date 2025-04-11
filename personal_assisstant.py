@@ -477,7 +477,15 @@ with tab3:
         templates = {
             "Study Plan": "Help me create a study plan for CA Finals. I need to cover these topics: ",
             "Focus Techniques": "What are some techniques to improve focus and concentration?",
-            "Addiction Recovery": "Can you suggest some strategies for overcoming addiction habits?",
+            "Productivity Tips": "What are some productivity tips for staying organized and efficient?",
+            "Time Management": "How can I manage my time more effectively?",
+            "Health and Wellness": "What are some tips for maintaining a healthy lifestyle?",
+            "Relationships": "How can I improve my relationships with friends and family?",
+            "Financial Planning": "What are some financial planning strategies I can use?",
+            "Travel Tips": "What are some tips for traveling safely and efficiently?",
+            "Hobbies and Interests": "What are some hobbies and interests I can explore?",
+            "Career and Professional Development": "What are some career and professional development strategies I can use?",
+            "Personal Branding": "How can I create a personal brand that reflects my values and personality?",
             "Daily Reflection": "Help me reflect on my day. I want to analyze what went well and what I could improve.",
             "Motivation Boost": "I'm feeling unmotivated today. Can you help me get back on track?"
         }
