@@ -216,7 +216,7 @@ def voice_output_button(text, key):
         text_to_speech(text)
 
 # === APP TABS ===
-tab1, tab2, tab3, tab4 = st.tabs(["📓 Journal", "💬 Chat", "⏰ Reminders", "📂 View Entries"])
+tab1, tab3, tab4, tab2 = st.tabs(["📓 Journal", "💬 Chat", "⏰ Reminders", "📂 View Entries"])
 
 # === JOURNAL TAB ===
 with tab1:
@@ -319,7 +319,7 @@ with tab1:
                 st.session_state.journal_entry = voice_text
 
 # === VIEW ENTRIES TAB ===
-with tab4:
+with tab2:
     st.title("📂 Saved Journal Entries")
     st.markdown("Browse and filter your past journal entries")
     
@@ -371,7 +371,7 @@ with tab4:
             conn.close()
 
 # === CHAT TAB ===
-with tab2:
+with tab3:
     st.title("💬 Chat with Gemini")
     st.markdown("##### Interactive AI assistant for personalized guidance")
     
@@ -577,7 +577,7 @@ with tab2:
         st.rerun()
 
 # === REMINDERS TAB ===
-with tab3:
+with tab4:
     st.title("⏰ Journal Reminders")
     st.markdown("##### Schedule regular journaling sessions")
     
