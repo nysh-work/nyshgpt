@@ -257,7 +257,8 @@ with tab1:
             col1, col2 = st.columns([1, 1])
             with col1:
                 mood = st.selectbox("How do you feel?", 
-                                   ["😄 Great", "🙂 Okay", "😐 Neutral", "😔 Low", "😣 Anxious"])
+                                   ["😄 Great", "🙂 Okay", "😐 Neutral", "😔 Low", "😣 Anxious",
+                                    "😊 Happy", "😌 Relaxed", "😟 Worried", "😠 Angry", "😴 Tired"])
             with col2:
                 tags = st.text_input("Tags (comma separated)", 
                                     placeholder="study, focus, progress...")
