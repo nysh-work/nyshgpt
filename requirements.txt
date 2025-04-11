@@ -5,3 +5,4 @@ ics
 speechrecognition
 pyttsx3
 gTTS
+plotly
