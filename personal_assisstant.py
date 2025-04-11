@@ -23,6 +23,25 @@ model = genai.GenerativeModel("gemini-2.5-pro-preview-03-25")
 
 st.set_page_config(page_title="Nysh GPT", page_icon="📱", layout="centered", initial_sidebar_state="collapsed")
 
+# Add app title with custom styling
+st.markdown("""
+<style>
+    .app-title {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: #805AD5;
+        text-align: center;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(90deg, #805AD5, #4F46E5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.markdown('<h1 class="app-title">Nysh GPT</h1>', unsafe_allow_html=True)
+
 # Add custom CSS for better styling
 st.markdown("""
 <style>
