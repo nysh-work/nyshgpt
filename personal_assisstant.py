@@ -254,6 +254,106 @@ tab1, tab2, tab3 = st.tabs(["📓 Journal", "📂 View Entries", "💬 Chat"])
 with tab1:
     st.title("🧠 Reflective Journal")
     st.markdown("##### Your personal space for reflection and growth")
+    
+    # Habit tracking section
+    with st.expander("🔥 Habit Tracking", expanded=True):
+        st.markdown("##### Your Journaling Streaks")
+        
+        try:
+            import sqlite3
+            db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
+            conn = sqlite3.connect(db_path)
+            cursor = conn.cursor()
+            
+            # Get current streak
+            cursor.execute("""
+            WITH dates AS (
+                SELECT date(timestamp) as entry_date
+                FROM journal_entries
+                ORDER BY timestamp DESC
+            ),
+            grouped AS (
+                SELECT 
+                    entry_date,
+                    julianday(entry_date) - julianday(LAG(entry_date) OVER (ORDER BY entry_date DESC)) as day_diff
+                FROM dates
+            ),
+            streaks AS (
+                SELECT 
+                    entry_date,
+                    SUM(CASE WHEN day_diff = 1 THEN 0 ELSE 1 END) OVER (ORDER BY entry_date DESC) as streak_group
+                FROM grouped
+            )
+            SELECT COUNT(*) as current_streak
+            FROM streaks
+            WHERE streak_group = 0
+            """)
+            current_streak = cursor.fetchone()[0] or 0
+            
+            # Get longest streak
+            cursor.execute("""
+            WITH dates AS (
+                SELECT date(timestamp) as entry_date
+                FROM journal_entries
+                ORDER BY timestamp DESC
+            ),
+            grouped AS (
+                SELECT 
+                    entry_date,
+                    julianday(entry_date) - julianday(LAG(entry_date) OVER (ORDER BY entry_date DESC)) as day_diff
+                FROM dates
+            ),
+            streaks AS (
+                SELECT 
+                    entry_date,
+                    SUM(CASE WHEN day_diff = 1 THEN 0 ELSE 1 END) OVER (ORDER BY entry_date DESC) as streak_group
+                FROM grouped
+            )
+            SELECT streak_group, COUNT(*) as streak_length
+            FROM streaks
+            GROUP BY streak_group
+            ORDER BY streak_length DESC
+            LIMIT 1
+            """)
+            longest_streak = cursor.fetchone()
+            longest_streak_length = longest_streak[1] if longest_streak else 0
+            
+            # Display streak info
+            col1, col2 = st.columns(2)
+            with col1:
+                st.metric("Current Streak", f"{current_streak} days", 
+                         help="Number of consecutive days you've journaled")
+            with col2:
+                st.metric("Longest Streak", f"{longest_streak_length} days", 
+                         help="Your longest journaling streak")
+            
+            # Weekly consistency
+            cursor.execute("""
+            SELECT 
+                strftime('%w', date(timestamp)) as weekday,
+                COUNT(*) as count
+            FROM journal_entries
+            GROUP BY weekday
+            ORDER BY weekday
+            """)
+            weekly_counts = cursor.fetchall()
+            
+            if weekly_counts:
+                days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+                counts = [0]*7
+                for day_num, count in weekly_counts:
+                    counts[int(day_num)] = count
+                
+                fig = px.bar(x=days, y=counts, 
+                            labels={"x": "Day of Week", "y": "Entries"},
+                            title="Weekly Journaling Consistency")
+                st.plotly_chart(fig, use_container_width=True)
+            
+        except Exception as e:
+            st.error(f"Error loading habit data: {e}")
+        finally:
+            if 'conn' in locals():
+                conn.close()
        # Create a card-like container for the form
     with st.container():
         st.markdown("---")
@@ -353,13 +453,15 @@ with tab1:
 
 # === VIEW ENTRIES TAB ===
 with tab2:
-    st.title("📂 Saved Journal Entries")
-    st.markdown("Browse and filter your past journal entries")
+    st.title("📊 Dashboard & Journal Entries")
+    st.markdown("Visualize your mood trends and browse past entries")
     
     try:
         import sqlite3
         import plotly.express as px
         import pandas as pd
+        import plotly.graph_objects as go
+        from plotly.subplots import make_subplots
         db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
         conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
@@ -390,51 +492,68 @@ with tab2:
         entries = cursor.fetchall()
         
         if entries:
-            # Gantt chart visualization
-            with st.expander("📊 Timeline View", expanded=True):
-                # Prepare data for visualization
-                df = pd.DataFrame(entries, columns=["timestamp", "entry", "mood", "tags"])
-                df["date"] = pd.to_datetime(df["timestamp"]).dt.date
-                df["count"] = 1
+            # Prepare data for visualizations
+            df = pd.DataFrame(entries, columns=["timestamp", "entry", "mood", "tags"])
+            df["date"] = pd.to_datetime(df["timestamp"]).dt.date
+            df["count"] = 1
+            df["weekday"] = pd.to_datetime(df["date"]).dt.day_name()
+            df["hour"] = pd.to_datetime(df["timestamp"]).dt.hour
+            
+            # Mood distribution pie chart
+            with st.expander("📈 Mood Distribution", expanded=True):
+                mood_counts = df["mood"].value_counts().reset_index()
+                mood_counts.columns = ["mood", "count"]
                 
-                # Group by date and mood
-                grouped = df.groupby(["date", "mood"])["count"].sum().reset_index()
-                
-                # Create Gantt-like timeline
-                fig = px.timeline(
-                    grouped, 
-                    x_start="date", 
-                    x_end="date", 
-                    y="mood",
-                    color="mood",
-                    color_discrete_map={
-                        "😄 Great": "#4CAF50",
-                        "🙂 Okay": "#8BC34A",
-                        "😐 Neutral": "#FFC107",
-                        "😔 Low": "#FF9800",
-                        "😣 Anxious": "#F44336"
-                    },
-                    title="Journal Entries Timeline",
-                    labels={"mood": "Mood", "date": "Date"},
-                    height=400
-                )
-                fig.update_layout(showlegend=False)
-                fig.update_traces(width=0.5)
+                fig = px.pie(mood_counts, values="count", names="mood", 
+                            color="mood",
+                            color_discrete_map={
+                                "😄 Great": "#4CAF50",
+                                "🙂 Okay": "#8BC34A",
+                                "😐 Neutral": "#FFC107",
+                                "😔 Low": "#FF9800",
+                                "😣 Anxious": "#F44336"
+                            },
+                            title="Mood Distribution")
                 st.plotly_chart(fig, use_container_width=True)
                 
-                # Show daily entry count
-                daily_count = df.groupby("date")["count"].sum().reset_index()
-                st.markdown("**Daily Entry Count**")
-                st.dataframe(daily_count, hide_index=True, use_container_width=True)
+                # Weekly patterns
+                weekly_patterns = df.groupby(["weekday", "mood"])["count"].sum().unstack().fillna(0)
+                weekly_patterns = weekly_patterns.reindex(["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"])
+                
+                fig = px.bar(weekly_patterns, 
+                            title="Weekly Mood Patterns",
+                            labels={"value": "Entries", "weekday": "Day of Week"},
+                            color_discrete_map={
+                                "😄 Great": "#4CAF50",
+                                "🙂 Okay": "#8BC34A",
+                                "😐 Neutral": "#FFC107",
+                                "😔 Low": "#FF9800",
+                                "😣 Anxious": "#F44336"
+                            })
+                st.plotly_chart(fig, use_container_width=True)
+                
+                # Time of day patterns
+                hourly_patterns = df.groupby(["hour", "mood"])["count"].sum().unstack().fillna(0)
+                fig = px.bar(hourly_patterns, 
+                            title="Time of Day Patterns",
+                            labels={"value": "Entries", "hour": "Hour of Day"},
+                            color_discrete_map={
+                                "😄 Great": "#4CAF50",
+                                "🙂 Okay": "#8BC34A",
+                                "😐 Neutral": "#FFC107",
+                                "😔 Low": "#FF9800",
+                                "😣 Anxious": "#F44336"
+                            })
+                st.plotly_chart(fig, use_container_width=True)
             
             # Individual entries display
-            st.markdown("**Individual Entries**")
-            for entry in entries:
-                with st.expander(f"{entry[0]} - {entry[2]}"):
-                    st.markdown(f"**Mood:** {entry[2]}")
-                    if entry[3]:
-                        st.markdown(f"**Tags:** {entry[3]}")
-                    st.markdown(f"**Entry:**\n{entry[1]}")
+            with st.expander("📂 View Individual Entries", expanded=True):
+                for entry in entries:
+                    with st.expander(f"{entry[0]} - {entry[2]}"):
+                        st.markdown(f"**Mood:** {entry[2]}")
+                        if entry[3]:
+                            st.markdown(f"**Tags:** {entry[3]}")
+                        st.markdown(f"**Entry:**\n{entry[1]}")
         else:
             st.info("No entries found matching your filters.")
         
