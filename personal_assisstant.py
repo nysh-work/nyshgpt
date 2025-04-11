@@ -444,9 +444,6 @@ with tab2:
         if 'conn' in locals():
             conn.close()
 
-# === CHAT TAB ===
-with tab3:
-
 # === DASHBOARD TAB ===
 with tab5:
     st.title("📊 Personal Dashboard")
