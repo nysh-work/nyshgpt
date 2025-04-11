@@ -11,6 +11,9 @@ from gtts import gTTS
 import tempfile
 import threading
 import queue
+import plotly.express as px
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 # === USER CONFIG ===
 GEMINI_API_KEY = st.secrets["GEMINI_API_KEY"]  # Store this in .streamlit/secrets.toml
