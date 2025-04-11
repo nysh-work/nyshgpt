@@ -248,7 +248,7 @@ def voice_output_button(text, key):
         text_to_speech(text)
 
 # === APP TABS ===
-tab1, tab2, tab3, tab4 = st.tabs(["📓 Journal", "📂 View Entries","💬 Chat"])
+tab1, tab2, tab3 = st.tabs(["📓 Journal", "📂 View Entries", "💬 Chat"])
 
 # === JOURNAL TAB ===
 with tab1:
