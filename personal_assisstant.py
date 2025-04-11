@@ -267,6 +267,32 @@ with tab1:
             submitted = st.form_submit_button("✨ Reflect and Save", 
                                              use_container_width=True, 
                                              type="primary")
+            
+            if submitted:
+                try:
+                    # Create journal directory if it doesn't exist
+                    journal_dir = os.path.join(os.path.dirname(__file__), "journal")
+                    os.makedirs(journal_dir, exist_ok=True)
+                    
+                    # Create filename with timestamp
+                    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+                    filename = f"journal_{timestamp}.md"
+                    filepath = os.path.join(journal_dir, filename)
+                    
+                    # Format content
+                    content = f"# Journal Entry - {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
+                    content += f"## Mood\n{mood}\n\n"
+                    content += f"## Tags\n{tags}\n\n"
+                    content += f"## Entry\n{entry}\n"
+                    
+                    # Write to file
+                    with open(filepath, "w", encoding="utf-8") as f:
+                        f.write(content)
+                    
+                    st.success(f"Journal entry saved to: {filepath}")
+                    st.session_state.journal_entry = ""  # Clear the entry
+                except Exception as e:
+                    st.error(f"Error saving journal entry: {e}")
         
         # Voice recording outside the form
         if st.session_state.get("show_voice_journal", False):
