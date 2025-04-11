@@ -222,60 +222,7 @@ tab1, tab2, tab3, tab4 = st.tabs(["📓 Journal", "💬 Chat", "⏰ Reminders", 
 with tab1:
     st.title("🧠 Reflective Journal")
     st.markdown("##### Your personal space for reflection and growth")
-
-# === VIEW ENTRIES TAB ===
-with tab4:
-    st.title("📂 Saved Journal Entries")
-    st.markdown("Browse and filter your past journal entries")
-    
-    try:
-        import sqlite3
-        db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        
-        # Add filters
-        col1, col2 = st.columns([1, 1])
-        with col1:
-            date_filter = st.date_input("Filter by date")
-        with col2:
-            mood_filter = st.selectbox("Filter by mood", 
-                                     ["All", "😄 Great", "🙂 Okay", "😐 Neutral", "😔 Low", "😣 Anxious"])
-        
-        # Build query
-        query = "SELECT timestamp, entry, mood, tags FROM journal_entries WHERE 1=1"
-        params = []
-        
-        if date_filter:
-            query += " AND date(timestamp) = date(?)"
-            params.append(date_filter.strftime('%Y-%m-%d'))
-        if mood_filter != "All":
-            query += " AND mood = ?"
-            params.append(mood_filter)
-        
-        query += " ORDER BY timestamp DESC"
-        
-        # Execute query
-        cursor.execute(query, params)
-        entries = cursor.fetchall()
-        
-        if entries:
-            for entry in entries:
-                with st.expander(f"{entry[0]} - {entry[2]}"):
-                    st.markdown(f"**Mood:** {entry[2]}")
-                    if entry[3]:
-                        st.markdown(f"**Tags:** {entry[3]}")
-                    st.markdown(f"**Entry:**\n{entry[1]}")
-        else:
-            st.info("No entries found matching your filters.")
-        
-    except Exception as e:
-        st.error(f"Error loading journal entries: {e}")
-    finally:
-        if 'conn' in locals():
-            conn.close()
-    
-    # Create a card-like container for the form
+       # Create a card-like container for the form
     with st.container():
         st.markdown("---")
         # === JOURNAL FORM ===
@@ -370,6 +317,58 @@ with tab4:
             if voice_text:
                 st.success(f"Recorded: {voice_text}")
                 st.session_state.journal_entry = voice_text
+
+# === VIEW ENTRIES TAB ===
+with tab4:
+    st.title("📂 Saved Journal Entries")
+    st.markdown("Browse and filter your past journal entries")
+    
+    try:
+        import sqlite3
+        db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Add filters
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            date_filter = st.date_input("Filter by date")
+        with col2:
+            mood_filter = st.selectbox("Filter by mood", 
+                                     ["All", "😄 Great", "🙂 Okay", "😐 Neutral", "😔 Low", "😣 Anxious"])
+        
+        # Build query
+        query = "SELECT timestamp, entry, mood, tags FROM journal_entries WHERE 1=1"
+        params = []
+        
+        if date_filter:
+            query += " AND date(timestamp) = date(?)"
+            params.append(date_filter.strftime('%Y-%m-%d'))
+        if mood_filter != "All":
+            query += " AND mood = ?"
+            params.append(mood_filter)
+        
+        query += " ORDER BY timestamp DESC"
+        
+        # Execute query
+        cursor.execute(query, params)
+        entries = cursor.fetchall()
+        
+        if entries:
+            for entry in entries:
+                with st.expander(f"{entry[0]} - {entry[2]}"):
+                    st.markdown(f"**Mood:** {entry[2]}")
+                    if entry[3]:
+                        st.markdown(f"**Tags:** {entry[3]}")
+                    st.markdown(f"**Entry:**\n{entry[1]}")
+        else:
+            st.info("No entries found matching your filters.")
+        
+    except Exception as e:
+        st.error(f"Error loading journal entries: {e}")
+    finally:
+        if 'conn' in locals():
+            conn.close()
 
 # === CHAT TAB ===
 with tab2:
