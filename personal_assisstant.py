@@ -456,6 +456,62 @@ with tab2:
     st.title("📊 Dashboard & Journal Entries")
     st.markdown("Visualize your mood trends and browse past entries")
     
+    # AI Insights section
+    with st.expander("🤖 AI-Powered Insights", expanded=True):
+        st.markdown("##### Journal Entry Analysis")
+        
+        if st.button("🔍 Analyze My Entries"):
+            with st.spinner("Analyzing your journal entries..."):
+                try:
+                    import sqlite3
+                    db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
+                    conn = sqlite3.connect(db_path)
+                    cursor = conn.cursor()
+                    
+                    # Get all entries
+                    cursor.execute("SELECT entry, mood, tags FROM journal_entries ORDER BY timestamp DESC")
+                    entries = cursor.fetchall()
+                    
+                    if entries:
+                        # Prepare data for analysis
+                        all_text = " ".join([entry[0] for entry in entries])
+                        moods = [entry[1] for entry in entries]
+                        tags = [entry[2] for entry in entries if entry[2]]
+                        
+                        # Generate insights with Gemini
+                        prompt = f"""Analyze these journal entries and provide insights:
+                        
+                        Journal Entries: {all_text[:10000]}
+                        
+                        Please provide:
+                        1. Key themes and patterns
+                        2. Emotional trends based on moods: {', '.join(set(moods))}
+                        3. Suggestions for improvement or areas to focus on
+                        4. Any notable changes over time
+                        
+                        Format as a clear, bullet-point summary."""
+                        
+                        response = model.generate_content(prompt)
+                        st.markdown(response.text)
+                        
+                        # Additional analysis for common tags
+                        if tags:
+                            prompt = f"""Analyze these journal tags and suggest habits:
+                            
+                            Tags: {', '.join(tags)}
+                            
+                            Suggest 3 habits that could help based on these tags."""
+                            response = model.generate_content(prompt)
+                            st.markdown("### Suggested Habits")
+                            st.markdown(response.text)
+                    else:
+                        st.info("No entries found to analyze.")
+                except Exception as e:
+                    st.error(f"Error analyzing entries: {e}")
+                finally:
+                    if 'conn' in locals():
+                        conn.close()
+    
     try:
         import sqlite3
         import plotly.express as px
@@ -566,6 +622,56 @@ with tab2:
 # === CHAT TAB ===
 with tab3:
     st.title("💬 Chat with Gemini")
+    st.markdown("Search across all tabs using the search box below")
+    
+    # Cross-tab search functionality
+    search_query = st.text_input("🔍 Search across all tabs", "", 
+                                placeholder="Search journal entries, chats, etc.")
+    
+    if search_query:
+        with st.expander("🔍 Search Results", expanded=True):
+            try:
+                import sqlite3
+                db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
+                conn = sqlite3.connect(db_path)
+                cursor = conn.cursor()
+                
+                # Search journal entries
+                cursor.execute("""
+                SELECT timestamp, entry, mood 
+                FROM journal_entries 
+                WHERE entry LIKE ? 
+                ORDER BY timestamp DESC
+                LIMIT 5
+                """, (f"%{search_query}%",))
+                journal_results = cursor.fetchall()
+                
+                if journal_results:
+                    st.markdown("### Journal Entries")
+                    for result in journal_results:
+                        with st.expander(f"{result[0]} - {result[2]}"):
+                            st.markdown(result[1])
+                else:
+                    st.info("No matching journal entries found.")
+                
+                # Search chat history
+                if "messages" in st.session_state and st.session_state.messages:
+                    chat_results = [msg for msg in st.session_state.messages 
+                                   if search_query.lower() in msg["content"].lower()]
+                    
+                    if chat_results:
+                        st.markdown("### Chat History")
+                        for msg in chat_results[:5]:  # Limit to 5 results
+                            with st.chat_message(msg["role"]):
+                                st.markdown(msg["content"])
+                    else:
+                        st.info("No matching chat messages found.")
+                
+            except Exception as e:
+                st.error(f"Search error: {e}")
+            finally:
+                if 'conn' in locals():
+                    conn.close()
     st.markdown("##### Interactive AI assistant for personalized guidance")
     
     # Initialize chat history and voice mode
