@@ -652,72 +652,8 @@ with tab3:
 
 # === REMINDERS TAB ===
 with tab4:
-    st.title("⏰ Reminders & Tasks")
-    st.markdown("##### Manage your reminders and tasks")
-    
-    # Create a card-like container for the form
-    with st.container():
-        st.markdown("---")
-        # === REMINDER FORM ===
-        with st.form("reminder_form"):
-            st.subheader("New Reminder")
-            
-            # Basic reminder info
-            title = st.text_input("Title", placeholder="What do you need to remember?")
-            description = st.text_area("Description", height=100, placeholder="Add details about your reminder...")
-            
-            # Use columns for form elements to save vertical space
-            col1, col2, col3 = st.columns([1, 1, 1])
-            with col1:
-                due_date = st.date_input("Due Date")
-            with col2:
-                priority = st.selectbox("Priority", 
-                                      ["🔥 High", "⚠️ Medium", "ℹ️ Low"],
-                                      index=1)
-            with col3:
-                category = st.selectbox("Category", 
-                                      ["📓 Journal", "📅 Appointment", "🛒 Shopping", "💼 Work", "🏠 Personal"])
-                
-            # Full-width button with better styling
-            submitted = st.form_submit_button("💾 Save Reminder", 
-                                             use_container_width=True, 
-                                             type="primary")
-            
-            if submitted:
-                try:
-                    import sqlite3
-                    # Initialize database connection
-                    db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
-                    conn = sqlite3.connect(db_path)
-                    cursor = conn.cursor()
-                    
-                    # Create reminders table if it doesn't exist
-                    cursor.execute("""
-                    CREATE TABLE IF NOT EXISTS reminders (
-                        id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        title TEXT NOT NULL,
-                        description TEXT,
-                        due_date TEXT NOT NULL,
-                        priority TEXT NOT NULL,
-                        category TEXT NOT NULL,
-                        is_completed INTEGER DEFAULT 0,
-                        created_at TEXT DEFAULT CURRENT_TIMESTAMP
-                    )
-                    """)
-                    
-                    # Insert new reminder
-                    cursor.execute(
-                        "INSERT INTO reminders (title, description, due_date, priority, category) VALUES (?, ?, ?, ?, ?)",
-                        (title, description, due_date.strftime('%Y-%m-%d'), priority, category)
-                    )
-                    conn.commit()
-                    
-                    st.success("Reminder saved successfully!")
-                except Exception as e:
-                    st.error(f"Error saving reminder: {e}")
-                finally:
-                    if 'conn' in locals():
-                        conn.close()
+    st.title("⏰ Journal Reminders")
+    st.markdown("##### Schedule regular journaling sessions")
     
     # Create a card-like container
     with st.container():
