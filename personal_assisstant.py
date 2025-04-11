@@ -135,12 +135,8 @@ recognizer = sr.Recognizer()
 
 # Initialize text-to-speech engines
 def init_pyttsx3():
-    try:
-        engine = pyttsx3.init()
-        return engine
-    except Exception as e:
-        st.error(f"Failed to initialize TTS engine: {e}. Please install eSpeak or eSpeak-ng.")
-        return None
+    engine = pyttsx3.init()
+    return engine
 
 # Queue for handling TTS in background
 tts_queue = queue.Queue()
