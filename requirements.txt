@@ -6,4 +6,4 @@ speechrecognition
 pyttsx3
 gTTS
 plotly
-express
+plotly-express
