@@ -659,7 +659,7 @@ with tab4:
     with st.container():
         st.markdown("---")
         # === REMINDER FORM ===
-        with st.form("reminder_form"):
+        with st.form(f"reminder_form_{datetime.datetime.now().timestamp()}"):
             st.subheader("New Reminder")
             
             # Basic reminder info
@@ -725,7 +725,7 @@ with tab4:
         st.subheader("Create New Reminder")
         
         # Reminder form with mobile-friendly layout
-        with st.form("reminder_form"):
+        with st.form(f"reminder_form_{datetime.datetime.now().timestamp()}"):
             reminder_name = st.text_input("Reminder Name", value=st.session_state.reminder_name_voice)
             
             # Use columns for date and time to save space
