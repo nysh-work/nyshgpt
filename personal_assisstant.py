@@ -216,12 +216,64 @@ def voice_output_button(text, key):
         text_to_speech(text)
 
 # === APP TABS ===
-tab1, tab2, tab3 = st.tabs(["📓 Journal", "💬 Chat", "⏰ Reminders"])
+tab1, tab2, tab3, tab4 = st.tabs(["📓 Journal", "💬 Chat", "⏰ Reminders", "📂 View Entries"])
 
 # === JOURNAL TAB ===
 with tab1:
     st.title("🧠 Reflective Journal")
     st.markdown("##### Your personal space for reflection and growth")
+
+# === VIEW ENTRIES TAB ===
+with tab4:
+    st.title("📂 Saved Journal Entries")
+    st.markdown("Browse and filter your past journal entries")
+    
+    try:
+        import sqlite3
+        db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
+        conn = sqlite3.connect(db_path)
+        cursor = conn.cursor()
+        
+        # Add filters
+        col1, col2 = st.columns([1, 1])
+        with col1:
+            date_filter = st.date_input("Filter by date")
+        with col2:
+            mood_filter = st.selectbox("Filter by mood", 
+                                     ["All", "😄 Great", "🙂 Okay", "😐 Neutral", "😔 Low", "😣 Anxious"])
+        
+        # Build query
+        query = "SELECT timestamp, entry, mood, tags FROM journal_entries WHERE 1=1"
+        params = []
+        
+        if date_filter:
+            query += " AND date(timestamp) = date(?)"
+            params.append(date_filter.strftime('%Y-%m-%d'))
+        if mood_filter != "All":
+            query += " AND mood = ?"
+            params.append(mood_filter)
+        
+        query += " ORDER BY timestamp DESC"
+        
+        # Execute query
+        cursor.execute(query, params)
+        entries = cursor.fetchall()
+        
+        if entries:
+            for entry in entries:
+                with st.expander(f"{entry[0]} - {entry[2]}"):
+                    st.markdown(f"**Mood:** {entry[2]}")
+                    if entry[3]:
+                        st.markdown(f"**Tags:** {entry[3]}")
+                    st.markdown(f"**Entry:**\n{entry[1]}")
+        else:
+            st.info("No entries found matching your filters.")
+        
+    except Exception as e:
+        st.error(f"Error loading journal entries: {e}")
+    finally:
+        if 'conn' in locals():
+            conn.close()
     
     # Create a card-like container for the form
     with st.container():
@@ -270,29 +322,39 @@ with tab1:
             
             if submitted:
                 try:
-                    # Create journal directory if it doesn't exist
-                    journal_dir = os.path.join(os.path.dirname(__file__), "journal")
-                    os.makedirs(journal_dir, exist_ok=True)
+                    import sqlite3
+                    # Initialize database connection
+                    db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
+                    conn = sqlite3.connect(db_path)
+                    cursor = conn.cursor()
                     
-                    # Create filename with timestamp
-                    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-                    filename = f"journal_{timestamp}.md"
-                    filepath = os.path.join(journal_dir, filename)
+                    # Create table if it doesn't exist
+                    cursor.execute("""
+                    CREATE TABLE IF NOT EXISTS journal_entries (
+                        id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        timestamp TEXT NOT NULL,
+                        entry TEXT NOT NULL,
+                        mood TEXT NOT NULL,
+                        tags TEXT,
+                        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+                    )
+                    """)
                     
-                    # Format content
-                    content = f"# Journal Entry - {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n"
-                    content += f"## Mood\n{mood}\n\n"
-                    content += f"## Tags\n{tags}\n\n"
-                    content += f"## Entry\n{entry}\n"
+                    # Insert new entry
+                    timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    cursor.execute(
+                        "INSERT INTO journal_entries (timestamp, entry, mood, tags) VALUES (?, ?, ?, ?)",
+                        (timestamp, entry, mood, tags)
+                    )
+                    conn.commit()
                     
-                    # Write to file
-                    with open(filepath, "w", encoding="utf-8") as f:
-                        f.write(content)
-                    
-                    st.success(f"Journal entry saved to: {filepath}")
+                    st.success("Journal entry saved to database!")
                     st.session_state.journal_entry = ""  # Clear the entry
                 except Exception as e:
                     st.error(f"Error saving journal entry: {e}")
+                finally:
+                    if 'conn' in locals():
+                        conn.close()
         
         # Voice recording outside the form
         if st.session_state.get("show_voice_journal", False):
