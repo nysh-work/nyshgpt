@@ -662,10 +662,6 @@ with tab4:
         
         # Reminder form with mobile-friendly layout
         with st.form("reminder_form"):
-            # Full-width button with consistent styling
-            submitted = st.form_submit_button("⏰ Set Reminder", 
-                                             use_container_width=True, 
-                                             type="primary")
             reminder_name = st.text_input("Reminder Name", value=st.session_state.reminder_name_voice)
             
             # Use columns for date and time to save space
