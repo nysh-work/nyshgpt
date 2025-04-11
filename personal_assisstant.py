@@ -57,6 +57,8 @@ st.markdown("""
         gap: 10px;
         padding: 0 1rem;
         margin-bottom: 1.5rem;
+        display: flex;
+        justify-content: center;
     }
     .stTabs [data-baseweb="tab"] {
         height: 60px;
