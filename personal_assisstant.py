@@ -248,7 +248,7 @@ def voice_output_button(text, key):
         text_to_speech(text)
 
 # === APP TABS ===
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["📓 Journal", "📂 View Entries","💬 Chat", "⏰ Reminders", "📊 Dashboard"])
+tab1, tab2, tab3, tab4 = st.tabs(["📓 Journal", "📂 View Entries","💬 Chat", "⏰ Reminders", ])
 
 # === JOURNAL TAB ===
 with tab1:
@@ -443,92 +443,6 @@ with tab2:
     finally:
         if 'conn' in locals():
             conn.close()
-
-# === DASHBOARD TAB ===
-with tab5:
-    st.title("📊 Personal Dashboard")
-    st.markdown("##### Your central hub for insights and progress tracking")
-    
-    # Create columns for dashboard layout
-    col1, col2 = st.columns([1, 1])
-    
-    with col1:
-        st.markdown("### 🗓️ Recent Activity")
-        try:
-            import sqlite3
-            import pandas as pd
-            from datetime import datetime, timedelta
-            
-            # Get recent journal entries
-            db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
-            conn = sqlite3.connect(db_path)
-            
-            # Get last 5 journal entries
-            journal_df = pd.read_sql("SELECT timestamp, mood FROM journal_entries ORDER BY timestamp DESC LIMIT 5", conn)
-            
-            # Get mood distribution
-            mood_df = pd.read_sql("SELECT mood, COUNT(*) as count FROM journal_entries GROUP BY mood", conn)
-            
-            # Get chat statistics
-            chat_count = len([m for m in st.session_state.get('messages', []) if m['role'] == 'user'])
-            
-            st.markdown(f"**Last Journal Entry:** {journal_df.iloc[0]['timestamp'] if not journal_df.empty else 'None'}")
-            st.markdown(f"**Current Mood:** {journal_df.iloc[0]['mood'] if not journal_df.empty else 'Not recorded'}")
-            st.markdown(f"**Total Chats:** {chat_count}")
-            
-            # Show mood distribution pie chart
-            if not mood_df.empty:
-                st.markdown("### 😊 Mood Distribution")
-                st.bar_chart(mood_df.set_index('mood'))
-            
-        except Exception as e:
-            st.error(f"Error loading dashboard data: {e}")
-        finally:
-            if 'conn' in locals():
-                conn.close()
-    
-    with col2:
-        st.markdown("### 📈 Weekly Activity")
-        try:
-            import sqlite3
-            import pandas as pd
-            
-            db_path = os.path.join(os.path.dirname(__file__), "journal_entries.db")
-            conn = sqlite3.connect(db_path)
-            
-            # Get weekly journal count
-            weekly_df = pd.read_sql("""
-                SELECT date(timestamp) as day, COUNT(*) as count 
-                FROM journal_entries 
-                WHERE date(timestamp) >= date('now', '-7 days')
-                GROUP BY day
-                ORDER BY day
-            """, conn)
-            
-            if not weekly_df.empty:
-                st.line_chart(weekly_df.set_index('day'))
-            else:
-                st.info("No journal entries in the past week")
-            
-            # Show most common tags
-            tags_df = pd.read_sql("""
-                SELECT value as tag, COUNT(*) as count
-                FROM journal_entries, json_each('[' || replace(tags, ',', ',') || ']')
-                WHERE tags IS NOT NULL AND tags != ''
-                GROUP BY tag
-                ORDER BY count DESC
-                LIMIT 5
-            """, conn)
-            
-            if not tags_df.empty:
-                st.markdown("### 🏷️ Top Tags")
-                st.dataframe(tags_df, hide_index=True, use_container_width=True)
-            
-        except Exception as e:
-            st.error(f"Error loading weekly data: {e}")
-        finally:
-            if 'conn' in locals():
-                conn.close()
 
 # === CHAT TAB ===
 with tab3:
