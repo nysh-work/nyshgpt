@@ -477,6 +477,7 @@ with tab3:
         templates = {
             "Study Plan": "Help me create a study plan for CA Finals. I need to cover these topics: ",
             "Focus Techniques": "What are some techniques to improve focus and concentration?",
+            "Motivation and Inspiration": "What are some motivational quotes and phrases I can use?",
             "Productivity Tips": "What are some productivity tips for staying organized and efficient?",
             "Time Management": "How can I manage my time more effectively?",
             "Health and Wellness": "What are some tips for maintaining a healthy lifestyle?",
