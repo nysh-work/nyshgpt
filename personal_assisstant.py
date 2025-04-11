@@ -628,43 +628,6 @@ with tab4:
         st.markdown("---")
         st.subheader("Create New Reminder")
         
-        # Initialize voice input for reminders
-        if "reminder_name_voice" not in st.session_state:
-            st.session_state.reminder_name_voice = "Journal Writing Time"
-        
-        if "reminder_notes_voice" not in st.session_state:
-            st.session_state.reminder_notes_voice = "Time to reflect on your day and write in your journal."
-        
-        # Voice input for reminder details
-        st.markdown("##### Voice Input")
-        st.markdown("Use voice to set reminder details")
-        
-        voice_tabs = st.tabs(["🏷️ Name", "📝 Notes"])
-        
-        with voice_tabs[0]:
-            st.markdown("Record reminder name")
-            
-            def update_reminder_name(text):
-                st.session_state.reminder_name_voice = text
-                st.rerun()
-            
-            voice_input_button("reminder_name", callback=update_reminder_name)
-            
-            if st.button("🔊 Listen to Name"):
-                text_to_speech(st.session_state.reminder_name_voice)
-        
-        with voice_tabs[1]:
-            st.markdown("Record reminder notes")
-            
-            def update_reminder_notes(text):
-                st.session_state.reminder_notes_voice = text
-                st.rerun()
-            
-            voice_input_button("reminder_notes", callback=update_reminder_notes)
-            
-            if st.button("🔊 Listen to Notes"):
-                text_to_speech(st.session_state.reminder_notes_voice)
-        
         # Reminder form with mobile-friendly layout
         with st.form("reminder_form"):
             reminder_name = st.text_input("Reminder Name", value=st.session_state.reminder_name_voice)
