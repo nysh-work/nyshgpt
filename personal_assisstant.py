@@ -495,7 +495,7 @@ with tab2:
                     Format as a clear, bullet-point summary."""
                     
                     response = model.generate_content(prompt)
-                    st.markdown(response.text)
+                    st.container(response.text)
                     
                     # Additional analysis for common tags
                     if tags:
